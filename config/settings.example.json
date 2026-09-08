@@ -1,0 +1,5 @@
+{
+  "mcpJs": { "mode": "coordinator", "url": "http://mcp-js:3000" },
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-sonnet-5"
+}

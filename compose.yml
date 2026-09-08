@@ -1,0 +1,58 @@
+# Local stack: an IRC server, a dedicated mcp-js engine, and the pi IRC bot.
+#
+#   cp .env.example .env     # set a provider key
+#   docker compose up --build
+#   then connect an IRC client to localhost:6667 and join #pi
+#
+# On Railway the same image runs against the project's InspIRCd and its own
+# mcp-js service; see README.
+services:
+  irc:
+    image: ghcr.io/ergochat/ergo:stable
+    ports:
+      - "${IRC_PUBLIC_PORT:-6667}:6667"
+    volumes:
+      - ergo-data:/ircd
+
+  mcp-js:
+    image: ${MCP_JS_IMAGE:-wholelottahoopla/mcp-js:0.21.0-rc.2}
+    command:
+      - --http-port=3000
+      - --heap-store=dir
+      - --heap-dir=/data/heaps
+      - --fs-store=dir
+      - --session-db-path=/data/sessions
+    volumes:
+      - mcp-js-data:/data
+    expose:
+      - "3000"
+
+  pi-irc:
+    build: .
+    depends_on:
+      - irc
+      - mcp-js
+    environment:
+      MCP_JS_URL: http://mcp-js:3000
+      IRC_SERVER: irc
+      IRC_PORT: "6667"
+      IRC_NICK: ${IRC_NICK:-pi}
+      IRC_CHANNELS: ${IRC_CHANNELS:-#pi}
+      IRC_CONTROL_CHANNEL: ${IRC_CONTROL_CHANNEL:-#pi}
+      PI_DEFAULT_PROVIDER: ${PI_DEFAULT_PROVIDER:-anthropic}
+      PI_DEFAULT_MODEL: ${PI_DEFAULT_MODEL:-claude-sonnet-5}
+      PI_MODELS_JSON: ${PI_MODELS_JSON:-}
+      PI_WEB_PORT: "8600"
+      PI_WEB_TOKEN: ${PI_WEB_TOKEN:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      LITELLM_API_KEY: ${LITELLM_API_KEY:-}
+    volumes:
+      - pi-agent:/data/agent
+    ports:
+      - "${PI_WEB_PUBLIC_PORT:-8600}:8600"
+
+volumes:
+  ergo-data:
+  mcp-js-data:
+  pi-agent:
