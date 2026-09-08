@@ -13,8 +13,10 @@ conversation, files, and heap.
 
 ## Talking to it
 
-Address the bot by nick in a channel (`pi: …`, `pi, …`, `@pi …`) or DM it.
-Each line is a prompt to that channel's session. While a turn runs, more
+The bot only reacts to channel lines that mention its nick (`pi: …`, `pi, …`,
+`@pi …`, or `pi` anywhere in the line, case-insensitive on whole words), and to
+DMs. Unmentioned chatter is never a prompt. Each mention is a prompt to that
+channel's session. While a turn runs, more
 lines are delivered as steering. The bot replies with the model's messages
 and one line per tool call:
 
@@ -27,10 +29,17 @@ and one line per tool call:
 <pi>  `/hello.txt` contains: `hi`
 ```
 
-## Commands (in `#pi` or a DM)
+## Commands
+
+Comma-prefixed. Inside a mention they work in any channel (`pi ,model astra`,
+`pi: ,thinking high`); bare `,command` lines work in `#pi` and DMs.
 
 | Command | Effect |
 | --- | --- |
+| `,model [query]` | Show the current and available models, or select the first one matching the query (provider/id/name, case-insensitive). |
+| `,thinking [level]` | Set the thinking level (`off`…`max`); no level cycles. |
+| `,compact [instructions]` | Compact the channel's session context. |
+| `,reload` | Reload the session's plugins. |
 | `,join #a,#b` | Join channels, one new session each (a remembered session is reused). |
 | `,fork #chan [#from]` | Join `#chan` with a session forked from `#from` (default: this channel): conversation, files, and heap are copied. |
 | `,part #chan` | Leave a channel; its session is kept for the next `,join`. |
@@ -65,7 +74,7 @@ them at start. Mount a directory at `/config` with `settings.json` and
 | `IRC_PASSWORD` | | server password (`PASS`) |
 | `IRC_CHANNELS` | `#pi` | channels to join at start, comma separated |
 | `IRC_CONTROL_CHANNEL` | `#pi` | where `,join`/`,fork`/`,part` are accepted (DMs always are) |
-| `IRC_RESPOND_TO_ALL` | `false` | react to every channel line, not only addressed ones |
+| `IRC_RESPOND_TO_ALL` | `false` | opt-in: react to every channel line instead of mentions only |
 | `PI_DEFAULT_PROVIDER`, `PI_DEFAULT_MODEL` | `anthropic`, `claude-sonnet-5` | model for new sessions |
 | `PI_MODELS_JSON` | | contents of a pi `models.json` for custom providers (e.g. a LiteLLM gateway) |
 | `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, … | | provider credentials, as pi expects them |
