@@ -75,9 +75,7 @@ docker compose up --build
 
 This starts an [Ergo](https://github.com/ergochat/ergo) IRC server on
 `localhost:6667`, a dedicated mcp-js engine, and the bot. Connect any IRC client
-to `localhost:6667`, join `#pi`, and say `pi: hello`. The browser UI for
-watching channels is at `http://127.0.0.1:8600/?token=<PI_WEB_TOKEN>`.
-
+to `localhost:6667`, join `#pi`, and say `pi: hello`. 
 ## Configuration
 
 Everything is environment variables; the container writes pi's settings from
@@ -98,7 +96,6 @@ them at start. Mount a directory at `/config` with `settings.json` and
 | `PI_DEFAULT_PROVIDER`, `PI_DEFAULT_MODEL` | `anthropic`, `claude-sonnet-5` | model for new sessions |
 | `PI_MODELS_JSON` | | contents of a pi `models.json` for custom providers (e.g. a LiteLLM gateway) |
 | `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, … | | provider credentials, as pi expects them |
-| `PI_WEB_PORT`, `PI_WEB_TOKEN` | off | serve the `pi web` browser UI on the same sessions |
 | `PI_IRC_STATE_DIR` | `/data/agent/irc` | channel → session map (`channels.json`) |
 
 Sessions, the channel map, and the engine's heaps and snapshots live under

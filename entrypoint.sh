@@ -33,8 +33,4 @@ for i in $(seq 1 60); do
   if curl -fsS "${url%/}/api/capabilities" >/dev/null 2>&1; then break; fi
   echo "waiting for mcp-js at $url ($i)"; sleep 2
 done
-args=()
-if [[ -n "${PI_WEB_PORT:-}" ]]; then args+=(--web-port "$PI_WEB_PORT"); fi
-if [[ -n "${PI_WEB_TOKEN:-}" ]]; then args+=(--web-token "$PI_WEB_TOKEN"); fi
-export PI_WEB_HOST="${PI_WEB_HOST:-0.0.0.0}"
-exec /app/pi-test.sh irc "${args[@]}" "$@"
+exec /app/pi-test.sh irc "$@"

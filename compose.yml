@@ -42,15 +42,11 @@ services:
       PI_DEFAULT_PROVIDER: ${PI_DEFAULT_PROVIDER:-anthropic}
       PI_DEFAULT_MODEL: ${PI_DEFAULT_MODEL:-claude-sonnet-5}
       PI_MODELS_JSON: ${PI_MODELS_JSON:-}
-      PI_WEB_PORT: "8600"
-      PI_WEB_TOKEN: ${PI_WEB_TOKEN:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       LITELLM_API_KEY: ${LITELLM_API_KEY:-}
     volumes:
       - pi-agent:/data/agent
-    ports:
-      - "${PI_WEB_PUBLIC_PORT:-8600}:8600"
 
 volumes:
   ergo-data:
