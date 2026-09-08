@@ -2,7 +2,7 @@
 # Builds r33drichards/pi at a pinned commit and runs `pi irc`.
 FROM node:22-bookworm-slim AS build
 ARG PI_REPO=https://github.com/r33drichards/pi.git
-ARG PI_COMMIT=384c025907e4a4ea3d0a4bd4bc0d34b19f0be03e
+ARG PI_COMMIT=384c02590c19ed88905ac994a33bb446d3bf12ae
 # Space-separated pi packages baked into the image's agent directory. Sessions
 # run on pi's normal runtime, so any extension from the pi registry works.
 ARG PI_EXTENSIONS="npm:pi-schedule-prompt"
