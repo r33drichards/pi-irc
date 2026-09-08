@@ -42,7 +42,7 @@ names may omit the `#`.
 | `,compact [instructions]` | Compact the channel's session context. |
 | `,reload` | Reload the session's plugins. |
 | `,join #a,#b` | Join channels, one new session each (a remembered session is reused). |
-| `,fork #a,#b` | Join each channel with a session forked from the channel you typed in: conversation, files, and heap are copied. `#` is optional: `pi ,fork ptest2,ptest3`. |
+| `,fork [#a,#b]` | Fork the channel you typed in into each channel (conversation and files are copied) and join them. `#` is optional: `pi ,fork ptest2,ptest3`. With no channel, `pi ,fork` creates `#<channel>-<petname>` (for example `#clone-brave-otter`) for you. |
 | `,part #chan` | Leave a channel; its session is kept for the next `,join`. |
 | `,sessions` | List channel → session. |
 | `,help` | Command reference. |
