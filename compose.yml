@@ -14,18 +14,18 @@ services:
     volumes:
       - ergo-data:/ircd
 
+  # Configured entirely by mcp-js/config.toml (+ policies) mounted at /config.
   mcp-js:
     image: ${MCP_JS_IMAGE:-wholelottahoopla/mcp-js:0.21.0-rc.2}
-    command:
-      - --http-port=3000
-      - --heap-store=dir
-      - --heap-dir=/data/heaps
-      - --fs-store=dir
-      - --session-db-path=/data/sessions
+    environment:
+      MCP_V8_CONFIG: /config/config.toml
     volumes:
+      - ./mcp-js:/config:ro
       - mcp-js-data:/data
     expose:
       - "3000"
+    # A large depth-1 clone peaks near 6 GB; give the engine room.
+    mem_limit: 7g
 
   pi-irc:
     build: .

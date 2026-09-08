@@ -1,0 +1,31 @@
+# mcp-js coordinator for pi-irc: one sandbox session per IRC channel.
+# Loaded with `mcp-v8 --config` / MCP_V8_CONFIG. Every key is a CLI flag;
+# see https://github.com/r33drichards/mcp-js site-docs/reference/config-file.md.
+# Paths are absolute because relative paths resolve against the server's
+# working directory, not this file.
+
+http_port = 3000
+bind_host = "0.0.0.0"
+allowed_hosts = ["*"]
+
+# Per-session filesystem snapshots (what the read/write/run_js tools see).
+fs_store = "dir"
+session_db_path = "/data/sessions"
+
+# Heap persistence is OFF for this deployment: with ES module imports and
+# large fetches in play, serializing the V8 heap after a run can abort the
+# whole server (V8 "Unknown external reference"), which was reproduced with a
+# depth-1 clone of trycua/cua. Files persist per session; globals do not.
+heap_store = "none"
+
+# A depth-1 isomorphic-git clone of a 150 MiB pack needs about 6 GB of V8 heap
+# and ~90 s; 300 is the server's maximum execution timeout.
+heap_memory_max = 6144
+execution_timeout = 300
+
+# ES module imports (isomorphic-git from esm.sh) and network for git hosting.
+allow_external_modules = true
+
+[policies]
+fetch = { policies = [{ url = "file:///config/policies/fetch.rego" }] }
+modules = { policies = [{ url = "file:///config/policies/modules.rego" }] }

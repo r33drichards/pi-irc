@@ -3,6 +3,8 @@
 # the mcp-js coordinator, then run `pi irc`.
 #
 #   MCP_JS_URL            mcp-js coordinator, e.g. http://mcp-js:3000   (required)
+#   MCP_JS_NETWORK        the engine's fetch policy lets sessions out (default true)
+#   MCP_JS_MODULES        the engine allows ES module URL imports    (default true)
 #   PI_DEFAULT_PROVIDER   provider id, e.g. anthropic                   (default anthropic)
 #   PI_DEFAULT_MODEL      model id, e.g. claude-sonnet-5                (default claude-sonnet-5)
 #   PI_MODELS_JSON        optional models.json contents for custom providers
@@ -15,7 +17,7 @@ else
   : "${MCP_JS_URL:?MCP_JS_URL must be set (the mcp-js coordinator URL)}"
   cat > /workspace/.pi/settings.json <<JSON
 {
-  "mcpJs": { "mode": "coordinator", "url": "${MCP_JS_URL}" },
+  "mcpJs": { "mode": "coordinator", "url": "${MCP_JS_URL}", "network": ${MCP_JS_NETWORK:-true}, "modules": ${MCP_JS_MODULES:-true} },
   "defaultProvider": "${PI_DEFAULT_PROVIDER:-anthropic}",
   "defaultModel": "${PI_DEFAULT_MODEL:-claude-sonnet-5}"
 }

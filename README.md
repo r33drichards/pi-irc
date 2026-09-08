@@ -85,20 +85,56 @@ them at start. Mount a directory at `/config` with `settings.json` and
 Sessions, the channel map, and the engine's heaps and snapshots live under
 `/data` in both containers; keep those on volumes.
 
+## The engine: `mcp-js/`
+
+The dedicated mcp-js coordinator is configured by one file,
+[`mcp-js/config.toml`](mcp-js/config.toml), loaded with `MCP_V8_CONFIG`
+(every key is a `mcp-v8` flag; see the mcp-js
+[config file reference](https://github.com/r33drichards/mcp-js/blob/main/site-docs/reference/config-file.md)),
+plus the Rego policies it references:
+
+- `fs_store = "dir"` and `session_db_path`: per-session filesystem snapshots.
+- `allow_external_modules = true` with `policies/modules.rego`: `import()`
+  of ES modules from esm.sh, jsdelivr, and unpkg.
+- `policies/fetch.rego`: `fetch` to GitHub (github.com, api/codeload/raw/objects)
+  and the same CDNs, nothing else.
+- `heap_memory_max = 6144`, `execution_timeout = 300`: a depth-1
+  isomorphic-git clone of a 150 MiB pack (for example trycua/cua) peaks near
+  6 GB and takes about 90 s; 300 s is the server maximum.
+- `heap_store = "none"`: heap persistence is off. With module imports and
+  large fetches in play, serializing the V8 heap after a run can abort the
+  whole engine (V8 "Unknown external reference"; reproduced with the
+  trycua/cua clone). Files persist per session; `globalThis` does not, and
+  the `run_js` tool description tells the model so.
+
+Locally, compose mounts `mcp-js/` at `/config` read-only. On Railway the
+engine is built from `mcp-js/Dockerfile` (`FROM wholelottahoopla/mcp-js`,
+`COPY mcp-js/ /config/`, `ENV MCP_V8_CONFIG`) so the same files ship in the
+image. Give the engine service at least 7 GB of memory.
+
+With network and modules enabled, sessions can clone repositories:
+
+```
+<rob> pi clone https://github.com/trycua/cua (depth 1) and list the top-level files
+<pi>  [run_js] 4 lines: const git = (await import("https://esm.sh/isomorphic-git@1.27.1")).default;
+<pi>  [run_js] → AGENTS.md, CITATION.cff, CLAUDE.md, … (+1 lines)
+```
+
+`MCP_JS_NETWORK` / `MCP_JS_MODULES` (default `true`) tell pi what the engine
+allows, which is how the model learns that `fetch` and `import()` work.
+
 ## Railway
 
-The image runs as-is on Railway. One service for this repo (Dockerfile build,
-volume at `/data/agent`) and one dedicated mcp-js service from the
-`wholelottahoopla/mcp-js:0.21.0-rc.2` image (0.21 or newer: the session file endpoints the pi coordinator uses shipped in mcp-js #267) with
+Two services from this repo, plus the project's IRC server:
 
-```
---http-port=3000 --heap-store=dir --heap-dir=/data/heaps --fs-store=dir --session-db-path=/data/sessions
-```
-
-and a volume at `/data`. Point `MCP_JS_URL` at the mcp-js service's private
-domain (`http://<service>.railway.internal:3000`) and `IRC_SERVER` at your IRC
-server's private domain. Provider keys can be Railway variable references to
-another service that already holds them.
+- `pi-irc-engine`: Dockerfile path `mcp-js/Dockerfile`, root `/`, volume at
+  `/data`, variable `RAILWAY_RUN_UID=0` (Railway mounts volumes as root; the
+  image runs as `mcpuser`). Everything else comes from `mcp-js/config.toml`.
+- `pi-irc`: the root `Dockerfile`, volume at `/data/agent`, and the variables
+  from the table above. `MCP_JS_URL` is
+  `http://${{pi-irc-engine.RAILWAY_PRIVATE_DOMAIN}}:3000`, `IRC_SERVER` the
+  IRC service's private domain, and provider keys can be Railway variable
+  references to a service that already holds them.
 
 ## How it works
 
