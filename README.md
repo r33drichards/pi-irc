@@ -155,13 +155,33 @@ Two services from this repo, plus the project's IRC server:
   IRC service's private domain, and provider keys can be Railway variable
   references to a service that already holds them.
 
+## Extensions
+
+Sessions load whatever is installed in the agent directory, so the pi package
+registry works from a channel. The image bakes in the packages listed in the
+`PI_EXTENSIONS` build argument (default `npm:pi-schedule-prompt`) and copies
+them into `/data/agent` on first boot; the volume keeps anything installed
+later. To change the set, rebuild with
+
+    docker build --build-arg PI_EXTENSIONS="npm:pi-schedule-prompt npm:pi-memory" .
+
+Extensions that register slash commands or TUI widgets load without error, but
+those surfaces are inert here: the bot has no terminal UI. `,reload` reloads
+them.
+
 ## How it works
 
-`pi irc` is an experimental presentation in the pi fork
-(`packages/coding-agent/src/experimental/irc/`, see its
-[docs](https://github.com/r33drichards/pi/blob/main/packages/coding-agent/docs/experimental-irc.md)).
-It runs pi's experimental server in-process; each channel holds one client
-connection attached to its session and relays transcript events back to IRC.
-`,fork` uses `SessionManagement.fork` for the conversation and seeds the new
-mcp-js session from the source's latest heap and filesystem ids over the
-coordinator's `/api/exec`. The Dockerfile pins the pi commit in `PI_COMMIT`.
+`pi irc` lives in the pi fork (`packages/coding-agent/src/irc/`, see its
+[docs](https://github.com/r33drichards/pi/blob/main/packages/coding-agent/docs/irc.md)).
+Each channel owns a normal pi `AgentSession` running in the bot's process,
+with pi's host file tools replaced by `read`/`write`/`run_js` over that
+channel's own mcp-js filesystem snapshot. `,fork` copies the conversation with
+`SessionManager.forkFrom` and seeds the new mcp-js session from the source's
+latest filesystem id over the coordinator's `/api/exec`; `,merge` reconciles
+them through `/api/fs/merge`. Every channel gets its own working directory
+under the agent directory, because extensions keep project-local state there.
+The Dockerfile pins the pi commit in `PI_COMMIT`.
+
+One caveat comes with that runtime: it expects a single session per process.
+An extension with a background timer can throw against a context it captured
+earlier, so `pi irc` logs such faults and keeps running rather than exiting.
