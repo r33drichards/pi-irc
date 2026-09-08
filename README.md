@@ -127,7 +127,8 @@ allows, which is how the model learns that `fetch` and `import()` work.
 
 Two services from this repo, plus the project's IRC server:
 
-- `pi-irc-engine`: Dockerfile path `mcp-js/Dockerfile`, root `/`, volume at
+- `pi-irc-engine`: config-as-code file `mcp-js/railway.json` (it selects
+  `mcp-js/Dockerfile`; the root `railway.json` would otherwise win), volume at
   `/data`, variable `RAILWAY_RUN_UID=0` (Railway mounts volumes as root; the
   image runs as `mcpuser`). Everything else comes from `mcp-js/config.toml`.
 - `pi-irc`: the root `Dockerfile`, volume at `/data/agent`, and the variables
