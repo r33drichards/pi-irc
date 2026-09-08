@@ -32,7 +32,8 @@ and one line per tool call:
 ## Commands
 
 Comma-prefixed. Inside a mention they work in any channel (`pi ,model astra`,
-`pi: ,thinking high`); bare `,command` lines work in `#pi` and DMs.
+`pi ,fork ptest2`); bare `,command` lines work in `#pi` and DMs. Channel
+names may omit the `#`.
 
 | Command | Effect |
 | --- | --- |
@@ -41,7 +42,7 @@ Comma-prefixed. Inside a mention they work in any channel (`pi ,model astra`,
 | `,compact [instructions]` | Compact the channel's session context. |
 | `,reload` | Reload the session's plugins. |
 | `,join #a,#b` | Join channels, one new session each (a remembered session is reused). |
-| `,fork #chan [#from]` | Join `#chan` with a session forked from `#from` (default: this channel): conversation, files, and heap are copied. |
+| `,fork #a,#b` | Join each channel with a session forked from the channel you typed in: conversation, files, and heap are copied. `#` is optional: `pi ,fork ptest2,ptest3`. |
 | `,part #chan` | Leave a channel; its session is kept for the next `,join`. |
 | `,sessions` | List channel → session. |
 | `,help` | Command reference. |
