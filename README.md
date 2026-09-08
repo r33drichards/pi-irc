@@ -169,11 +169,9 @@ Extensions that register slash commands or TUI widgets load without error, but
 those surfaces are inert here: the bot has no terminal UI. `,reload` reloads
 them.
 
-Output an extension produces on its own, such as a scheduled prompt's answer,
-reaches IRC only when the bot has a single channel open. With more than one,
-the job runs and records success but its answer never arrives. Tools an
-extension adds, such as `schedule_prompt` itself, work in every channel. See
-the caveat below.
+A scheduled prompt fires into the channel it was scheduled from, with any
+number of channels open: the extension prompts its own session and the channel
+relays that turn like any other.
 
 ## How it works
 
@@ -189,19 +187,9 @@ under the agent directory, because extensions keep project-local state there.
 The Dockerfile pins the pi commit in `PI_COMMIT`.
 
 One caveat comes with that runtime: it expects a single session per process,
-and this bot runs one per channel. Two consequences:
-
-- **Extension-driven turns only reach IRC when one channel is open.** With a
-  single channel a scheduled prompt fires, the model answers, and the answer
-  appears in the channel. With two, the job still executes and records
-  `runCount: 1, lastStatus: success`, but the answer never arrives. Prompts
-  typed by a person keep working either way.
-- **A background timer in an extension can throw against a stale context.**
-  `pi irc` names the channel that armed the timer, logs the failure, and keeps
-  running instead of exiting. It does not dispose the session: disposing one
-  invalidates the extension runtime the whole process shares and would stop
-  every other channel.
-
-The fix for both is one process per channel, matching what the runtime
-assumes. Until then, run a single channel if you depend on scheduled prompts
-reaching it.
+and this bot runs one per channel. A background timer in an extension can
+therefore throw against a context it captured earlier. `pi irc` names the
+channel that armed the timer, logs the failure, and keeps running instead of
+exiting, and the other channels are untouched. It deliberately does not
+dispose the session: disposing one invalidates the extension runtime the whole
+process shares and would stop every other channel.
