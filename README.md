@@ -44,8 +44,27 @@ names may omit the `#`.
 | `,join #a,#b` | Join channels, one new session each (a remembered session is reused). |
 | `,fork [#a,#b]` | Fork the channel you typed in into each channel (conversation and files are copied) and join them. `#` is optional: `pi ,fork ptest2,ptest3`. With no channel, `pi ,fork` creates `#<channel>-<petname>` (for example `#clone-brave-otter`) for you. |
 | `,part #chan` | Leave a channel; its session is kept for the next `,join`. |
+| `,merge #child [ours\|theirs]` | Merge a forked child's files back into this channel (three-way from the fork point via mcp-js `/api/fs/merge`). Conflicting paths are reported; `ours`/`theirs` resolves them. |
 | `,sessions` | List channel → session. |
 | `,help` | Command reference. |
+
+## Delegation
+
+The model in any channel can delegate: `spawn_channel` forks the channel into
+`#<channel>-<petname>`, runs a prompt there as the child's own turn (visible in
+the child channel), waits, and returns the child's answer; `merge_channel`
+brings the child's files back (same as `,merge`); `irc_send` posts to another
+channel, and a mention in that text prompts the other channel's session.
+
+```
+<rob> pi: spawn a child to create /notes/plan.md with a 3-line plan and report back
+<pi>  [spawn_channel] create /notes/plan.md with a 3-line plan …
+<pi>  spawned #pi-brave-otter (session 01a0…; files and conversation carried over)
+<pi>  [spawn_channel] → Child #pi-brave-otter (session 01a0…) finished. (+3 lines)
+<pi>  1. …  2. …  3. …
+<rob> pi ,merge #pi-brave-otter
+<pi>  merged #pi-brave-otter into #pi: files are live (snapshot dc70fb1f3443)
+```
 
 ## Run locally
 

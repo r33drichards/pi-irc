@@ -2,7 +2,7 @@
 # Builds r33drichards/pi at a pinned commit and runs `pi irc` (+ optional `pi web`).
 FROM node:22-bookworm-slim AS build
 ARG PI_REPO=https://github.com/r33drichards/pi.git
-ARG PI_COMMIT=0ee932f0e8ae455054613c6df74fa99fd7308ad0
+ARG PI_COMMIT=4cbf80bd49bb48af322b3e257f8a3230e707c88f
 RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
