@@ -79,7 +79,7 @@ Sessions, the channel map, and the engine's heaps and snapshots live under
 
 The image runs as-is on Railway. One service for this repo (Dockerfile build,
 volume at `/data/agent`) and one dedicated mcp-js service from the
-`wholelottahoopla/mcp-js:latest` image with
+`wholelottahoopla/mcp-js:0.21.0-rc.2` image (0.21 or newer: the session file endpoints the pi coordinator uses shipped in mcp-js #267) with
 
 ```
 --http-port=3000 --heap-store=dir --heap-dir=/data/heaps --fs-store=dir --session-db-path=/data/sessions
