@@ -12,6 +12,7 @@ allowed_hosts := {
     "esm.sh",
     "cdn.jsdelivr.net",
     "unpkg.com",
+    "docs.typesafe.ai",
 }
 
 allow if {
