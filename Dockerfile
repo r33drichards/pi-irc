@@ -11,9 +11,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends git ca-certific
 WORKDIR /app
 RUN git clone --filter=blob:none "$PI_REPO" . && git checkout --quiet "$PI_COMMIT" \
  && rm -rf .git
+# Use the matching release's model-data snapshot, verified before extraction.
+# Live catalog generation can remove providers or introduce unsupported APIs even
+# when PI_COMMIT is pinned. Only JSON data is extracted; Pi's source stays pinned.
+ADD --checksum=sha256:af7d11986179445ce6fe88b37d57de22f823c0ffd3a65cae31c555b7f5e99253 https://registry.npmjs.org/@earendil-works/pi-ai/-/pi-ai-0.85.1.tgz /tmp/pi-ai.tgz
+RUN tar -xzf /tmp/pi-ai.tgz -C packages/ai/src/providers --strip-components=3 package/dist/providers/data \
+ && rm /tmp/pi-ai.tgz
+COPY scripts/prepare-model-data.mjs /tmp/prepare-model-data.mjs
+RUN node /tmp/prepare-model-data.mjs /app && rm /tmp/prepare-model-data.mjs
 # Dev dependencies stay: pi irc runs from source through tsx.
 # --ignore-scripts skips native builds unused here.
-RUN npm ci --ignore-scripts --no-audit --no-fund && npm run build && npm cache clean --force
+RUN npm ci --ignore-scripts --no-audit --no-fund && npm run build:offline && npm cache clean --force
 # Extensions are installed into a seed agent directory, not /data/agent: that
 # path is a volume at runtime and would hide anything baked into the image.
 RUN if [ -n "$PI_EXTENSIONS" ]; then \
