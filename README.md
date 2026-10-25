@@ -186,6 +186,27 @@ them through `/api/fs/merge`. Every channel gets its own working directory
 under the agent directory, because extensions keep project-local state there.
 The Dockerfile pins the pi commit in `PI_COMMIT`.
 
+The build also pins the matching `@earendil-works/pi-ai@0.85.1` release archive
+by SHA-256 and extracts only its model-data JSON. The preparation script preserves
+the pinned source's post-release Copilot GPT Responses routing fix (#9253) and
+updates the catalog manifest using Pi's own validation helpers. `npm run build:offline`
+validates that snapshot and compiles without refreshing live model catalogs.
+When changing `PI_COMMIT`, review the matching catalog version and checksum
+together; incompatible provider data must fail the build.
+
+To verify the build and catalog regressions without provider calls:
+
+```sh
+docker build --target build -t pi-irc:build .
+docker run --rm --network none -e PI_SOURCE_ROOT=/app \
+  -v "$PWD/test:/tests:ro" pi-irc:build node --test /tests/model-catalog.test.mjs
+```
+
+For an existing hydrated Pi checkout, run
+`PI_SOURCE_ROOT=/path/to/pi node --test test/model-catalog.test.mjs` with Node 22.19
+or newer. These checks cover the Kimi Coding shard, OpenCode Go's supported APIs,
+and rejection of damaged model data. The full build checks TypeScript compatibility.
+
 One caveat comes with that runtime: it expects a single session per process,
 and this bot runs one per channel. A background timer in an extension can
 therefore throw against a context it captured earlier. `pi irc` names the
